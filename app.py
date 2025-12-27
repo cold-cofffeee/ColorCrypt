@@ -304,11 +304,18 @@ def decrypt():
 @app.route('/download/<filename>')
 def download(filename):
     """Download an encrypted or decrypted file."""
+    print(f"📥 Download request for: {filename}")
     try:
-        file_path = os.path.join(app.config['OUTPUT_FOLDER'], secure_filename(filename))
+        # Try exact filename first
+        file_path = os.path.join(app.config['OUTPUT_FOLDER'], filename)
+        print(f"🔍 Looking for file at: {file_path}")
+        
         if not os.path.exists(file_path):
+            print(f"❌ File not found at: {file_path}")
+            print(f"📂 Available files: {os.listdir(app.config['OUTPUT_FOLDER'])}")
             return jsonify({'error': 'File not found'}), 404
         
+        print(f"✅ File found, sending...")
         response = send_file(file_path, as_attachment=True, download_name=filename)
         
         # Clean up file after sending
@@ -317,12 +324,14 @@ def download(filename):
             try:
                 if os.path.exists(file_path):
                     os.remove(file_path)
-            except:
-                pass
+                    print(f"🗑️ Cleaned up: {filename}")
+            except Exception as e:
+                print(f"⚠️ Cleanup failed: {e}")
         
         return response
     
     except Exception as e:
+        print(f"❌ Download error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 
