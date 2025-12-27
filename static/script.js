@@ -331,7 +331,12 @@ function processEncryption() {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         loadingArea.classList.add('hidden');
         
@@ -344,7 +349,8 @@ function processEncryption() {
     })
     .catch(error => {
         loadingArea.classList.add('hidden');
-        showError('encrypt', 'An error occurred. Please try again.');
+        console.error('Encryption error:', error);
+        showError('encrypt', 'An error occurred: ' + error.message + '. Please check console for details.');
         filesList.classList.remove('hidden');
     });
 }
@@ -498,7 +504,12 @@ function handleDecryption(files) {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         loadingArea.classList.add('hidden');
         
@@ -517,7 +528,8 @@ function handleDecryption(files) {
     })
     .catch(error => {
         loadingArea.classList.add('hidden');
-        showError('decrypt', 'An error occurred. Please try again.');
+        console.error('Decryption error:', error);
+        showError('decrypt', 'An error occurred: ' + error.message + '. Please check console for details.');
         uploadArea.classList.remove('hidden');
     });
 }
