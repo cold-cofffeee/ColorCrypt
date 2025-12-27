@@ -24,17 +24,19 @@ Default: 500MB × 1000 = 500GB (increase MAX_CHUNKS for bigger files!)
 ==============================================
 """
 
-# Upload Limits (per HTTP request)
-MAX_CONTENT_LENGTH = 600 * 1024 * 1024  # 600 MB max upload per request (allows files up to 500MB + headers)
-
-# Bulk upload limits
-MAX_FILES_PER_BATCH = 10  # Maximum number of files in a single bulk upload
-MAX_BULK_TOTAL_SIZE = 200 * 1024 * 1024  # 200 MB total for all files in bulk upload
-
 # Automatic file chunking - CONFIGURE YOUR CHUNK SIZE HERE
 ENABLE_AUTO_CHUNKING = True  # Automatically split large files into chunks
 CHUNK_SIZE = 500 * 1024 * 1024  # 500 MB per chunk (USER CONFIGURABLE - set your preferred size!)
 MAX_CHUNKS = 1000  # Maximum number of chunks per file (1000 chunks × 500MB = 500GB max)
+
+# Upload Limits (per HTTP request)
+# Set high enough to allow large files before server-side chunking
+# Flask streams files to disk, so this doesn't consume RAM
+MAX_CONTENT_LENGTH = 20 * 1024 * 1024 * 1024  # 20GB - allows files up to 20GB before chunking
+
+# Bulk upload limits
+MAX_FILES_PER_BATCH = 10  # Maximum number of files in a single bulk upload
+MAX_BULK_TOTAL_SIZE = 200 * 1024 * 1024  # 200 MB total for all files in bulk upload
 
 
 def format_size(size_bytes):

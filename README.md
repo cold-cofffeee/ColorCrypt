@@ -41,7 +41,19 @@ ColorCrypt features a modern, gradient-based web UI with drag-and-drop functiona
   - Set individual passwords or use one for all
   - Batch download with individual buttons
 
-- 🎨 **Dark/Light Theme Toggle**: 
+- � **Automatic File Chunking**: Handle files of ANY size!
+  - Files larger than 500MB automatically split into chunks
+  - No file size limits (default max: 500GB, configurable to unlimited!)
+  - Seamless reassembly during decryption
+  - Progress tracking with timer and ETA
+
+- ⏱️ **Real-Time Progress Tracking**:
+  - Live progress bar with percentage
+  - Elapsed time and estimated time remaining (ETA)
+  - Detailed status messages (e.g., "Splitting file into chunks", "Encrypting chunk 5 of 10")
+  - Automatic speed-based estimation
+
+- �🎨 **Dark/Light Theme Toggle**: 
   - Beautiful dark theme ("Encrypted Spectrum" - default)
   - Clean light theme for better readability
   - Theme preference saved automatically
@@ -87,7 +99,100 @@ Then open your browser to: **http://127.0.0.1:5000**
 
 🎉 That's it! Use the beautiful web interface to encrypt and decrypt files.
 
-### 🔑 Using Password Protection
+---
+
+## 🎯 Automatic File Chunking
+
+ColorCrypt automatically handles files of **any size**! Large files are split into manageable chunks during encryption and seamlessly reassembled during decryption.
+
+### 🚀 Quick Start
+
+**Encrypting a 5GB file?** Just do it!
+
+1. **Select your file** (100MB, 1GB, 5GB, even 20GB!)
+2. **Click Encrypt** - ColorCrypt auto-splits into 500MB chunks
+3. **Download all chunks** - Multiple PNG files created
+4. **To decrypt:** Select all PNG chunks → Upload → Get original file back!
+
+### How It Works
+
+**Encryption:**
+```
+Original File: movie.mp4 (5GB)
+        ↓
+ Auto-Split into chunks
+        ↓
+ 10 chunks × 500MB each
+        ↓
+ Encrypt each chunk
+        ↓
+Output: movie_chunk0000.png ... movie_chunk0009.png
+```
+
+**Decryption:**
+1. Select all 10 PNG chunks (Ctrl+Click)
+2. Upload them together
+3. ColorCrypt automatically reassembles
+4. Download complete original file!
+
+### ⚙️ Configuration
+
+All settings in `config.py`:
+
+```python
+# USER CONFIGURABLE!
+ENABLE_AUTO_CHUNKING = True               # Enable auto-chunking
+CHUNK_SIZE = 500 * 1024 * 1024           # 500MB per chunk (CHANGE THIS!)
+MAX_CHUNKS = 1000                        # Max chunks (500GB default)
+MAX_CONTENT_LENGTH = 20 * 1024 * 1024 * 1024  # 20GB upload limit
+```
+
+**Key Settings:**
+
+- **CHUNK_SIZE** (Default: 500MB) - Size of each chunk
+  - Smaller (250MB): More files, easier to manage
+  - Larger (1GB-2GB): Fewer files, faster processing
+  
+- **MAX_CHUNKS** (Default: 1000) - Maximum chunks per file
+  - Max file size = `CHUNK_SIZE × MAX_CHUNKS`
+  - Default: 500MB × 1000 = **500GB max**
+  - Want 1TB? Set `MAX_CHUNKS = 2000`
+  - Want unlimited? Set `MAX_CHUNKS = 10000` (5TB+)
+
+- **MAX_CONTENT_LENGTH** (Default: 20GB) - Server upload limit
+  - Files stream to disk (doesn't use RAM)
+  - Increase for even larger files
+
+### 📊 File Size Capabilities
+
+| Chunk Size | Max Chunks | Maximum File Size |
+|-----------|-----------|------------------|
+| **500 MB (Default)** | **1000** | **~500 GB** |
+| 500 MB | 2000 | ~1 TB |
+| 1 GB | 1000 | ~1 TB |
+| 1 GB | 5000 | ~5 TB |
+| 2 GB | 1000 | ~2 TB |
+
+**Formula:** `Max File Size = CHUNK_SIZE × MAX_CHUNKS`
+
+### ⏱️ Progress Tracking
+
+Watch your encryption/decryption in real-time:
+- **Progress bar** with percentage (0-100%)
+- **Timer** showing elapsed time
+- **ETA** showing estimated time remaining
+- **Status messages**: "Splitting file into chunks", "Encrypting chunk 5 of 10", "Reassembling file"
+
+Example for 1GB file:
+```
+⏱️ 45s | ETA: 1m 15s
+70%
+Encrypting chunk 3 of 4...
+```
+
+---
+
+## 🔑 Using Password Protection
 
 **Encrypting with password:**
 1. Select files to encrypt
