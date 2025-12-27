@@ -41,11 +41,14 @@ def get_limits():
 @app.route('/encrypt', methods=['POST'])
 def encrypt():
     """Encrypt files into PNG images (supports bulk upload)."""
+    print(f"🔵 Received encryption request")
     try:
         if 'files' not in request.files:
+            print(f"❌ No files in request")
             return jsonify({'error': 'No files provided'}), 400
         
         files = request.files.getlist('files')
+        print(f"📦 Received {len(files)} file(s)")
         if not files or files[0].filename == '':
             return jsonify({'error': 'No files selected'}), 400
         
@@ -168,6 +171,10 @@ def encrypt():
             })
     
     except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"❌ Encryption error: {str(e)}")
+        print(error_details)
         return jsonify({'error': str(e)}), 500
 
 

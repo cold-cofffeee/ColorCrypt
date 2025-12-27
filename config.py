@@ -25,7 +25,7 @@ Default: 500MB × 1000 = 500GB (increase MAX_CHUNKS for bigger files!)
 """
 
 # Upload Limits (per HTTP request)
-MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100 MB max upload per request
+MAX_CONTENT_LENGTH = 600 * 1024 * 1024  # 600 MB max upload per request (allows files up to 500MB + headers)
 
 # Bulk upload limits
 MAX_FILES_PER_BATCH = 10  # Maximum number of files in a single bulk upload
