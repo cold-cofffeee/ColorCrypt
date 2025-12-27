@@ -305,6 +305,9 @@ function processEncryption() {
     resultArea.classList.add('hidden');
     loadingArea.classList.remove('hidden');
     
+    // Reset progress
+    updateProgress('encrypt', 0, 'Preparing files...', '');
+    
     const formData = new FormData();
     const usePassword = document.getElementById('encrypt-use-password').checked;
     const useIndividual = document.querySelector('input[name="password-mode"]:checked')?.value === 'individual';
@@ -327,6 +330,13 @@ function processEncryption() {
         }
     }
     
+    // Simulate progress for upload
+    updateProgress('encrypt', 10, 'Uploading files...', `${selectedFiles.length} file(s) selected`);
+    
+    setTimeout(() => {
+        updateProgress('encrypt', 30, 'Processing...', 'Analyzing file size and splitting if needed');
+    }, 300);
+    
     fetch('/encrypt', {
         method: 'POST',
         body: formData
@@ -335,17 +345,22 @@ function processEncryption() {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+        updateProgress('encrypt', 70, 'Encrypting...', 'Creating encrypted PNG images');
         return response.json();
     })
     .then(data => {
-        loadingArea.classList.add('hidden');
+        updateProgress('encrypt', 100, 'Complete!', 'Files encrypted successfully');
         
-        if (data.error) {
-            showError('encrypt', data.error);
-            filesList.classList.remove('hidden');
-        } else {
-            showEncryptResult(data);
-        }
+        setTimeout(() => {
+            loadingArea.classList.add('hidden');
+            
+            if (data.error) {
+                showError('encrypt', data.error);
+                filesList.classList.remove('hidden');
+            } else {
+                showEncryptResult(data);
+            }
+        }, 500);
     })
     .catch(error => {
         loadingArea.classList.add('hidden');
@@ -481,8 +496,17 @@ function handleDecryption(files) {
     resultArea.classList.add('hidden');
     loadingArea.classList.remove('hidden');
     
-    const formData = new FormData();
+    // Reset progress
     const filesArray = Array.from(files);
+    const isChunked = filesArray.length > 1;
+    
+    if (isChunked) {
+        updateProgress('decrypt', 0, 'Preparing chunks...', `${filesArray.length} chunks detected`);
+    } else {
+        updateProgress('decrypt', 0, 'Preparing...', 'Loading encrypted file');
+    }
+    
+    const formData = new FormData();
     
     // Check if multiple files (chunks) or single file
     if (filesArray.length > 1) {
@@ -500,6 +524,17 @@ function handleDecryption(files) {
         formData.append('password', password);
     }
     
+    // Simulate progress for upload
+    updateProgress('decrypt', 20, 'Uploading...', isChunked ? 'Uploading all chunks' : 'Uploading encrypted file');
+    
+    setTimeout(() => {
+        if (isChunked) {
+            updateProgress('decrypt', 40, 'Decrypting chunks...', `Processing ${filesArray.length} chunks`);
+        } else {
+            updateProgress('decrypt', 40, 'Decrypting...', 'Extracting original file');
+        }
+    }, 300);
+    
     fetch('/decrypt', {
         method: 'POST',
         body: formData
@@ -508,23 +543,32 @@ function handleDecryption(files) {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
+        if (isChunked) {
+            updateProgress('decrypt', 70, 'Reassembling file...', 'Combining all chunks into original file');
+        } else {
+            updateProgress('decrypt', 70, 'Finalizing...', 'Preparing download');
+        }
         return response.json();
     })
     .then(data => {
-        loadingArea.classList.add('hidden');
+        updateProgress('decrypt', 100, 'Complete!', isChunked ? 'File reassembled successfully' : 'File decrypted successfully');
         
-        if (data.error) {
-            if (data.requires_password) {
-                showError('decrypt', data.error + ' Please enter the password above and try again.');
-                passwordGroup.classList.add('highlight-password');
-                setTimeout(() => passwordGroup.classList.remove('highlight-password'), 2000);
+        setTimeout(() => {
+            loadingArea.classList.add('hidden');
+            
+            if (data.error) {
+                if (data.requires_password) {
+                    showError('decrypt', data.error + ' Please enter the password above and try again.');
+                    passwordGroup.classList.add('highlight-password');
+                    setTimeout(() => passwordGroup.classList.remove('highlight-password'), 2000);
+                } else {
+                    showError('decrypt', data.error);
+                }
+                uploadArea.classList.remove('hidden');
             } else {
-                showError('decrypt', data.error);
+                showDecryptResult(data);
             }
-            uploadArea.classList.remove('hidden');
-        } else {
-            showDecryptResult(data);
-        }
+        }, 500);
     })
     .catch(error => {
         loadingArea.classList.add('hidden');
@@ -599,6 +643,18 @@ window.downloadAllChunks = function(chunks) {
         }, index * 500); // 500ms delay between downloads
     });
 };
+
+function updateProgress(mode, percentage, status, detail) {
+    const progressBar = document.getElementById(`${mode}-progress-bar`);
+    const progressText = document.getElementById(`${mode}-progress-text`);
+    const statusText = document.getElementById(`${mode}-status`);
+    const detailText = document.getElementById(`${mode}-progress-detail`);
+    
+    if (progressBar) progressBar.style.width = percentage + '%';
+    if (progressText) progressText.textContent = percentage + '%';
+    if (statusText) statusText.textContent = status;
+    if (detailText) detailText.textContent = detail;
+}
 
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';

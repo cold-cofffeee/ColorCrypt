@@ -103,7 +103,12 @@
 
                 <div id="encrypt-loading" class="loading hidden">
                     <div class="spinner"></div>
-                    <p>Encrypting your files...</p>
+                    <p id="encrypt-status">Processing your files...</p>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="encrypt-progress-bar"></div>
+                    </div>
+                    <p class="progress-text" id="encrypt-progress-text">0%</p>
+                    <p class="progress-detail" id="encrypt-progress-detail"></p>
                 </div>
 
                 <div id="encrypt-error" class="error-box hidden">
@@ -161,7 +166,12 @@
 
                 <div id="decrypt-loading" class="loading hidden">
                     <div class="spinner"></div>
-                    <p>Decrypting your image...</p>
+                    <p id="decrypt-status">Processing...</p>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="decrypt-progress-bar"></div>
+                    </div>
+                    <p class="progress-text" id="decrypt-progress-text">0%</p>
+                    <p class="progress-detail" id="decrypt-progress-detail"></p>
                 </div>
 
                 <div id="decrypt-error" class="error-box hidden">

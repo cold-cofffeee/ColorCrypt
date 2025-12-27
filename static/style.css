@@ -821,7 +821,10 @@ header {
 /* Loading */
 .loading {
     text-align: center;
-    padding: 40px;
+    padding: 60px 40px;
+    background: var(--secondary-gradient);
+    border-radius: var(--border-radius);
+    margin-bottom: 20px;
 }
 
 .spinner {
@@ -842,8 +845,48 @@ header {
 }
 
 .loading p {
+    margin: 15px 0 5px 0;
+    color: var(--text-primary);
     font-size: 16px;
+    font-weight: 500;
+}
+
+.progress-container {
+    width: 100%;
+    max-width: 500px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 20px auto 10px auto;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--accent-gradient);
+    transition: width 0.3s ease;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(94, 231, 255, 0.5);
+}
+
+.progress-text {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin: 10px 0;
+    font-family: 'Courier New', monospace;
+}
+
+.progress-detail {
+    font-size: 14px;
     color: var(--text-secondary);
+    margin-top: 10px;
+    font-style: italic;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Error Box */
