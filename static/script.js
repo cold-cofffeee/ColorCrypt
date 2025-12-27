@@ -2,6 +2,8 @@
 
 let selectedFiles = [];
 let downloadUrls = {};
+let timerIntervals = {};
+let startTimes = {};
 let fileSizeLimits = {
     max_input_size: 50 * 1024 * 1024,
     max_output_size: 100 * 1024 * 1024,
@@ -305,8 +307,9 @@ function processEncryption() {
     resultArea.classList.add('hidden');
     loadingArea.classList.remove('hidden');
     
-    // Reset progress
+    // Reset progress and start timer
     updateProgress('encrypt', 0, 'Preparing files...', '');
+    startTimer('encrypt');
     
     const formData = new FormData();
     const usePassword = document.getElementById('encrypt-use-password').checked;
@@ -350,6 +353,7 @@ function processEncryption() {
     })
     .then(data => {
         updateProgress('encrypt', 100, 'Complete!', 'Files encrypted successfully');
+        stopTimer('encrypt');
         
         setTimeout(() => {
             loadingArea.classList.add('hidden');
@@ -363,6 +367,7 @@ function processEncryption() {
         }, 500);
     })
     .catch(error => {
+        stopTimer('encrypt');
         loadingArea.classList.add('hidden');
         console.error('Encryption error:', error);
         showError('encrypt', 'An error occurred: ' + error.message + '. Please check console for details.');
@@ -496,7 +501,8 @@ function handleDecryption(files) {
     resultArea.classList.add('hidden');
     loadingArea.classList.remove('hidden');
     
-    // Reset progress
+    // Reset progress and start timer
+    startTimer('decrypt');
     const filesArray = Array.from(files);
     const isChunked = filesArray.length > 1;
     
@@ -552,6 +558,7 @@ function handleDecryption(files) {
     })
     .then(data => {
         updateProgress('decrypt', 100, 'Complete!', isChunked ? 'File reassembled successfully' : 'File decrypted successfully');
+        stopTimer('decrypt');
         
         setTimeout(() => {
             loadingArea.classList.add('hidden');
@@ -570,8 +577,7 @@ function handleDecryption(files) {
             }
         }, 500);
     })
-    .catch(error => {
-        loadingArea.classList.add('hidden');
+    .catch(error => {        stopTimer('decrypt');        loadingArea.classList.add('hidden');
         console.error('Decryption error:', error);
         showError('decrypt', 'An error occurred: ' + error.message + '. Please check console for details.');
         uploadArea.classList.remove('hidden');

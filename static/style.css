@@ -889,6 +889,15 @@ header {
     margin-right: auto;
 }
 
+.timer-display {
+    font-size: 18px;
+    color: var(--accent-color);
+    font-weight: 600;
+    margin-top: 15px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 1px;
+}
+
 /* Error Box */
 .error-box {
     background: var(--secondary-gradient);
