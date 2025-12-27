@@ -4,6 +4,8 @@ let selectedFiles = [];
 let downloadUrls = {};
 let timerIntervals = {};
 let startTimes = {};
+let estimatedTimes = {};
+let lastProgress = {};
 let fileSizeLimits = {
     max_input_size: 50 * 1024 * 1024,
     max_output_size: 100 * 1024 * 1024,
@@ -307,9 +309,10 @@ function processEncryption() {
     resultArea.classList.add('hidden');
     loadingArea.classList.remove('hidden');
     
-    // Reset progress and start timer
+    // Reset progress and start timer with file size
+    const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
     updateProgress('encrypt', 0, 'Preparing files...', '');
-    startTimer('encrypt');
+    startTimer('encrypt', totalSize);
     
     const formData = new FormData();
     const usePassword = document.getElementById('encrypt-use-password').checked;
@@ -501,9 +504,10 @@ function handleDecryption(files) {
     resultArea.classList.add('hidden');
     loadingArea.classList.remove('hidden');
     
-    // Reset progress and start timer
-    startTimer('decrypt');
+    // Reset progress and start timer with file size
     const filesArray = Array.from(files);
+    const totalSize = filesArray.reduce((sum, file) => sum + file.size, 0);
+    startTimer('decrypt', totalSize);
     const isChunked = filesArray.length > 1;
     
     if (isChunked) {
