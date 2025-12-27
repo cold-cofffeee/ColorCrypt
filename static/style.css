@@ -470,7 +470,8 @@ header {
 
 .radio-label:hover .radio-text,
 .radio-label input[type="radio"]:checked ~ .radio-text {
-    color: var(--text-primary);}
+    color: var(--text-primary);
+}
 
 /* Decrypt Password Section */
 .decrypt-password .password-input-group {
@@ -491,11 +492,6 @@ header {
 .password-label i {
     color: var(--accent-color);
     font-size: 16px;
-}    cursor: pointer;
-}
-
-.bulk-password-option input[type="radio"] {
-    margin-right: 8px;
 }
 
 /* Files List */
