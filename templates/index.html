@@ -10,9 +10,14 @@
 <body>
     <div class="container">
         <header>
-            <div class="logo">
-                <i class="fas fa-palette"></i>
-                <h1>ColorCrypt</h1>
+            <div class="header-top">
+                <div class="logo">
+                    <i class="fas fa-palette"></i>
+                    <h1>ColorCrypt</h1>
+                </div>
+                <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+                    <i class="fas fa-sun"></i>
+                </button>
             </div>
             <p class="tagline">Turn any file into an image, and back again</p>
         </header>
@@ -31,36 +36,59 @@
             <div class="tab-content active" id="encrypt-tab">
                 <div class="info-box">
                     <i class="fas fa-info-circle"></i>
-                    <p>Convert any file into a PNG image. Perfect for sharing files that platforms don't normally accept!</p>
+                    <p>Convert files into PNG images. Add password protection for extra security. Supports bulk upload!</p>
+                </div>
+
+                <div class="password-section">
+                    <div class="password-toggle">
+                        <input type="checkbox" id="encrypt-use-password" class="toggle-checkbox">
+                        <label for="encrypt-use-password">
+                            <i class="fas fa-key"></i> Use password protection
+                        </label>
+                    </div>
+                    <div class="password-input-group hidden" id="encrypt-password-group">
+                        <input type="password" id="encrypt-password" placeholder="Enter password" class="password-input">
+                        <button type="button" class="toggle-password" data-target="encrypt-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="bulk-password-option hidden" id="encrypt-bulk-option">
+                        <label>
+                            <input type="radio" name="password-mode" value="shared" checked>
+                            Use same password for all files
+                        </label>
+                        <label>
+                            <input type="radio" name="password-mode" value="individual">
+                            Set individual passwords
+                        </label>
+                    </div>
                 </div>
 
                 <div class="upload-area" id="encrypt-upload">
                     <div class="upload-icon">
                         <i class="fas fa-file-upload"></i>
                     </div>
-                    <h3>Drop your file here</h3>
-                    <p>or click to browse</p>
-                    <input type="file" id="encrypt-file-input" accept="*/*" hidden>
+                    <h3>Drop your files here</h3>
+                    <p>or click to browse • Supports multiple files</p>
+                    <input type="file" id="encrypt-file-input" accept="*/*" multiple hidden>
                 </div>
+
+                <div id="encrypt-files-list" class="files-list hidden"></div>
 
                 <div id="encrypt-result" class="result-area hidden">
                     <div class="result-success">
                         <i class="fas fa-check-circle"></i>
-                        <h3>File encrypted successfully!</h3>
-                        <p class="result-filename"></p>
-                        <p class="result-size"></p>
-                        <button class="btn btn-primary" id="encrypt-download-btn">
-                            <i class="fas fa-download"></i> Download PNG
-                        </button>
+                        <h3>Files encrypted successfully!</h3>
+                        <div id="encrypt-result-content"></div>
                         <button class="btn btn-secondary" id="encrypt-reset-btn">
-                            <i class="fas fa-redo"></i> Encrypt Another
+                            <i class="fas fa-redo"></i> Encrypt More Files
                         </button>
                     </div>
                 </div>
 
                 <div id="encrypt-loading" class="loading hidden">
                     <div class="spinner"></div>
-                    <p>Encrypting your file...</p>
+                    <p>Encrypting your files...</p>
                 </div>
 
                 <div id="encrypt-error" class="error-box hidden">
@@ -73,7 +101,16 @@
             <div class="tab-content" id="decrypt-tab">
                 <div class="info-box">
                     <i class="fas fa-info-circle"></i>
-                    <p>Recover the original file from a ColorCrypt PNG image.</p>
+                    <p>Recover the original file from a ColorCrypt PNG image. Password will be requested if needed.</p>
+                </div>
+
+                <div class="password-section">
+                    <div class="password-input-group" id="decrypt-password-group">
+                        <input type="password" id="decrypt-password" placeholder="Enter password (if protected)" class="password-input">
+                        <button type="button" class="toggle-password" data-target="decrypt-password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="upload-area" id="decrypt-upload">
@@ -117,7 +154,7 @@
                 <div class="feature">
                     <i class="fas fa-shield-alt"></i>
                     <h4>Secure</h4>
-                    <p>SHA1 integrity check</p>
+                    <p>AES-256 encryption + SHA1</p>
                 </div>
                 <div class="feature">
                     <i class="fas fa-bolt"></i>

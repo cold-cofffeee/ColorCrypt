@@ -33,39 +33,65 @@ def index():
 
 @app.route('/encrypt', methods=['POST'])
 def encrypt():
-    """Encrypt a file into a PNG image."""
+    """Encrypt files into PNG images (supports bulk upload)."""
     try:
-        if 'file' not in request.files:
-            return jsonify({'error': 'No file provided'}), 400
+        if 'files' not in request.files:
+            return jsonify({'error': 'No files provided'}), 400
         
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({'error': 'No file selected'}), 400
+        files = request.files.getlist('files')
+        if not files or files[0].filename == '':
+            return jsonify({'error': 'No files selected'}), 400
         
-        # Save uploaded file
-        filename = secure_filename(file.filename)
-        input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(input_path)
+        password = request.form.get('password', '').strip() or None
+        use_individual_passwords = request.form.get('use_individual_passwords') == 'true'
         
-        # Generate output filename
-        output_filename = f"{Path(filename).stem}_encrypted.png"
-        output_path = os.path.join(app.config['OUTPUT_FOLDER'], output_filename)
+        results = []
         
-        # Encrypt
-        ColorCrypt.encrypt_file_to_image(input_path, output_path)
+        for idx, file in enumerate(files):
+            filename = secure_filename(file.filename)
+            input_path = os.path.join(app.config['UPLOAD_FOLDER'], f"{idx}_{filename}")
+            file.save(input_path)
+            
+            # Get individual password if applicable
+            file_password = None
+            if use_individual_passwords:
+                file_password = request.form.get(f'password_{idx}', '').strip() or None
+            elif password:
+                file_password = password
+            
+            # Generate output filename
+            output_filename = f"{Path(filename).stem}_encrypted.png"
+            output_path = os.path.join(app.config['OUTPUT_FOLDER'], f"{idx}_{output_filename}")
+            
+            # Encrypt
+            ColorCrypt.encrypt_file_to_image(input_path, output_path, file_password)
+            
+            # Get file size
+            file_size = os.path.getsize(output_path)
+            
+            # Clean up input file
+            os.remove(input_path)
+            
+            results.append({
+                'original_name': filename,
+                'filename': output_filename,
+                'size': file_size,
+                'download_url': f'/download/{Path(output_path).name}',
+                'protected': file_password is not None
+            })
         
-        # Get file size
-        file_size = os.path.getsize(output_path)
-        
-        # Clean up input file
-        os.remove(input_path)
-        
-        return jsonify({
-            'success': True,
-            'filename': output_filename,
-            'size': file_size,
-            'download_url': f'/download/{output_filename}'
-        })
+        if len(results) == 1:
+            return jsonify({
+                'success': True,
+                **results[0]
+            })
+        else:
+            return jsonify({
+                'success': True,
+                'bulk': True,
+                'files': results,
+                'count': len(results)
+            })
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -86,13 +112,23 @@ def decrypt():
         if not allowed_file(file.filename, {'png'}):
             return jsonify({'error': 'Please upload a PNG image'}), 400
         
+        password = request.form.get('password', '').strip() or None
+        
         # Save uploaded file
         filename = secure_filename(file.filename)
         input_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(input_path)
         
         # Decrypt
-        output_path = ColorCrypt.decrypt_image_to_file(input_path, app.config['OUTPUT_FOLDER'])
+        try:
+            output_path = ColorCrypt.decrypt_image_to_file(input_path, app.config['OUTPUT_FOLDER'], password)
+        except ValueError as e:
+            # Clean up input file
+            os.remove(input_path)
+            error_msg = str(e)
+            if "password protected" in error_msg.lower():
+                return jsonify({'error': error_msg, 'requires_password': True}), 400
+            return jsonify({'error': error_msg}), 400
         
         # Get file info
         output_filename = Path(output_path).name
