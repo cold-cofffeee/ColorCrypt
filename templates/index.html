@@ -35,8 +35,11 @@
             <!-- Encrypt Tab -->
             <div class="tab-content active" id="encrypt-tab">
                 <div class="info-box">
-                    <i class="fas fa-info-circle"></i>
-                    <p>Convert files into PNG images. Add password protection for extra security. Supports bulk upload!</p>
+                    <div>
+                        <i class="fas fa-info-circle"></i>
+                        <p>Convert files into PNG images. Add password protection for extra security. Supports bulk upload!</p>
+                    </div>
+                    <p class="info-limits"><strong>Limits:</strong> <span id="encrypt-limits-info">Loading...</span></p>
                 </div>
 
                 <div class="password-section">
@@ -137,8 +140,8 @@
                         <i class="fas fa-image"></i>
                     </div>
                     <h3>Drop your PNG here</h3>
-                    <p>or click to browse</p>
-                    <input type="file" id="decrypt-file-input" accept=".png,image/png" hidden>
+                    <p>or click to browse • For chunked files, select all chunks</p>
+                    <input type="file" id="decrypt-file-input" accept=".png,image/png" multiple hidden>
                 </div>
 
                 <div id="decrypt-result" class="result-area hidden">

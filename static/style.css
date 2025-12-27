@@ -214,10 +214,19 @@ header {
     border-radius: var(--border-radius);
     margin-bottom: 30px;
     display: flex;
-    align-items: center;
-    gap: 15px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
     box-shadow: var(--shadow);
     border: 1px solid rgba(94, 231, 255, 0.15);
+}
+
+.info-box > div:first-child,
+.info-box > p:first-of-type {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
 }
 
 .info-box i {
@@ -230,6 +239,13 @@ header {
     margin: 0;
     color: var(--text-secondary);
     font-weight: 400;
+}
+
+.info-box .info-limits {
+    font-size: 0.9em;
+    color: var(--accent-color);
+    opacity: 0.8;
+    margin-top: 5px;
 }
 
 /* Password Section */
@@ -599,6 +615,32 @@ header {
     border-radius: 6px;
     font-size: 11px;
     margin-bottom: 10px;
+}
+
+/* Chunked File Display */
+.chunked-file {
+    background: linear-gradient(135deg, rgba(95, 124, 255, 0.05), rgba(179, 92, 255, 0.05));
+    border: 2px solid rgba(94, 231, 255, 0.2);
+}
+
+.chunk-info {
+    color: var(--accent-color);
+    font-size: 13px;
+    margin: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chunk-download {
+    margin: 5px 5px 5px 0;
+    padding: 8px 15px;
+    font-size: 12px;
+}
+
+.download-all-chunks {
+    margin-top: 10px;
+    width: 100%;
 }
 
 

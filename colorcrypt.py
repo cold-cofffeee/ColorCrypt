@@ -27,6 +27,83 @@ class ColorCrypt:
     ENCRYPTED_HEADER_LENGTH = 2 + 8 + FILENAME_FIELD_LENGTH + SHA1_LENGTH + SALT_LENGTH + IV_LENGTH  # 334 bytes
     
     @classmethod
+    def split_file_into_chunks(cls, file_path: str, chunk_size: int) -> list:
+        """Split a file into chunks and return chunk file paths."""
+        import tempfile
+        chunks = []
+        file_name = Path(file_path).stem
+        file_ext = Path(file_path).suffix
+        
+        with open(file_path, 'rb') as f:
+            chunk_num = 0
+            while True:
+                chunk_data = f.read(chunk_size)
+                if not chunk_data:
+                    break
+                
+                # Create temporary chunk file
+                chunk_path = tempfile.mktemp(suffix=f'_chunk{chunk_num:04d}{file_ext}')
+                with open(chunk_path, 'wb') as chunk_file:
+                    chunk_file.write(chunk_data)
+                
+                chunks.append({
+                    'path': chunk_path,
+                    'number': chunk_num,
+                    'size': len(chunk_data)
+                })
+                chunk_num += 1
+        
+        return chunks
+    
+    @classmethod
+    def reassemble_chunks(cls, chunk_paths: list, output_path: str) -> None:
+        """Reassemble chunks into original file."""
+        with open(output_path, 'wb') as output_file:
+            for chunk_path in sorted(chunk_paths):
+                with open(chunk_path, 'rb') as chunk_file:
+                    output_file.write(chunk_file.read())
+    
+    @classmethod
+    def calculate_output_size(cls, input_file_size: int, is_encrypted: bool = False) -> int:
+        """
+        Calculate the expected output PNG file size for a given input file.
+        
+        Args:
+            input_file_size: Size of the input file in bytes
+            is_encrypted: Whether the file will be password-protected
+        
+        Returns:
+            Estimated size of the output PNG file in bytes
+        """
+        # Calculate data size (header + file data)
+        if is_encrypted:
+            # Encrypted data is padded to 16-byte blocks (AES block size)
+            encrypted_size = input_file_size
+            # Add padding for AES block alignment
+            if encrypted_size % 16 != 0:
+                encrypted_size += (16 - encrypted_size % 16)
+            data_size = cls.ENCRYPTED_HEADER_LENGTH + encrypted_size
+        else:
+            data_size = cls.HEADER_LENGTH + input_file_size
+        
+        # Calculate image dimensions (RGBA = 4 bytes per pixel)
+        pixels_needed = math.ceil(data_size / 4.0)
+        image_size = math.ceil(math.sqrt(pixels_needed))
+        
+        # Estimate PNG file size (actual size varies due to compression)
+        # PNG overhead: header (~8 bytes) + IHDR chunk (~25 bytes) + IDAT chunk header (~12 bytes per chunk)
+        # + IEND chunk (~12 bytes) + uncompressed RGBA data
+        # Compression typically reduces size by 10-30%, but we use worst case (no compression)
+        uncompressed_data = image_size * image_size * 4  # RGBA
+        png_overhead = 8 + 25 + 12 + 12  # Basic PNG structure
+        chunk_overhead = (uncompressed_data // 8192 + 1) * 12  # Multiple IDAT chunks
+        
+        estimated_size = png_overhead + chunk_overhead + uncompressed_data
+        
+        # Add 10% safety margin
+        return int(estimated_size * 1.1)
+    
+    @classmethod
     def encrypt_file_to_image(cls, input_file_path: str, output_image_path: str, password: str = None) -> None:
         """
         Convert a file into a PNG image with optional password protection.

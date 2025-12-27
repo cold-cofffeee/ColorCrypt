@@ -2,8 +2,17 @@
 
 let selectedFiles = [];
 let downloadUrls = {};
+let fileSizeLimits = {
+    max_input_size: 50 * 1024 * 1024,
+    max_output_size: 100 * 1024 * 1024,
+    max_files_per_batch: 10,
+    max_bulk_total_size: 200 * 1024 * 1024
+};
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Fetch file size limits from server
+    fetchFileSizeLimits();
+    
     // Theme toggle
     setupThemeToggle();
     
@@ -19,6 +28,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Decrypt functionality
     setupDecryptTab();
 });
+
+async function fetchFileSizeLimits() {
+    try {
+        const response = await fetch('/api/limits');
+        if (response.ok) {
+            fileSizeLimits = await response.json();
+            updateLimitsDisplay();
+        }
+    } catch (error) {
+        console.error('Failed to fetch file size limits:', error);
+    }
+}
+
+function updateLimitsDisplay() {
+    const limitsInfo = document.getElementById('encrypt-limits-info');
+    if (limitsInfo) {
+        if (fileSizeLimits.enable_auto_chunking) {
+            const maxSize = (fileSizeLimits.chunk_size * fileSizeLimits.max_chunks) / (1024 * 1024 * 1024);
+            limitsInfo.innerHTML = `Files auto-split into ${fileSizeLimits.chunk_size_formatted} chunks • No file size limit (up to ${maxSize.toFixed(0)}GB)`;
+        } else {
+            limitsInfo.innerHTML = `Chunking disabled • Max ${fileSizeLimits.max_files_per_batch} files per batch`;
+        }
+    }
+}
 
 function setupThemeToggle() {
     const themeToggle = document.getElementById('theme-toggle');
@@ -136,6 +169,32 @@ function setupEncryptTab() {
         selectedFiles = Array.from(files);
         
         if (selectedFiles.length === 0) return;
+        
+        // Validate number of files
+        if (selectedFiles.length > fileSizeLimits.max_files_per_batch) {
+            showError('encrypt', `Too many files selected. Maximum ${fileSizeLimits.max_files_per_batch} files per batch.`);            selectedFiles = [];
+            return;
+        }
+        
+        // If auto-chunking is enabled, skip size validation (will be handled server-side)
+        if (!fileSizeLimits.enable_auto_chunking) {
+            // Validate individual file sizes
+            const oversizedFiles = selectedFiles.filter(file => file.size > fileSizeLimits.max_input_size);
+            if (oversizedFiles.length > 0) {
+                const fileNames = oversizedFiles.map(f => f.name).join(', ');
+                showError('encrypt', `File(s) too large: ${fileNames}. Maximum input file size is ${fileSizeLimits.max_input_size_formatted}.`);
+                selectedFiles = [];
+                return;
+            }
+            
+            // Validate total size for bulk uploads
+            const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
+            if (selectedFiles.length > 1 && totalSize > fileSizeLimits.max_bulk_total_size) {
+                showError('encrypt', `Total file size exceeds limit. Maximum ${fileSizeLimits.max_bulk_total_size_formatted} for bulk upload.`);
+                selectedFiles = [];
+                return;
+            }
+        }
         
         // Show files list
         displayFilesList();
@@ -296,16 +355,57 @@ function showEncryptResult(data) {
     
     if (data.bulk) {
         // Multiple files
-        resultContent.innerHTML = data.files.map(file => `
-            <div class="result-file">
-                <div class="result-file-name">📄 ${file.filename}</div>
-                <div class="result-file-size">📦 Size: ${formatFileSize(file.size)}</div>
-                ${file.protected ? '<div class="result-file-protected"><i class="fas fa-lock"></i> Password Protected</div>' : ''}
-                <button class="btn btn-primary btn-sm" onclick="downloadFile('${file.download_url}', '${file.filename}')">
-                    <i class="fas fa-download"></i> Download
+        resultContent.innerHTML = data.files.map(file => {
+            if (file.is_chunked) {
+                // Chunked file
+                return `
+                    <div class="result-file chunked-file">
+                        <div class="result-file-name">📄 ${file.original_name}</div>
+                        <div class="result-file-size">📦 Original Size: ${formatFileSize(file.original_size)}</div>
+                        <div class="chunk-info"><i class="fas fa-puzzle-piece"></i> Split into ${file.total_chunks} chunks</div>
+                        ${file.protected ? '<div class="result-file-protected"><i class="fas fa-lock"></i> Password Protected</div>' : ''}
+                        ${file.chunks.map(chunk => `
+                            <button class="btn btn-secondary btn-sm chunk-download" onclick="downloadFile('${chunk.download_url}', '${chunk.filename}')">
+                                <i class="fas fa-download"></i> Chunk ${chunk.chunk_number + 1}
+                            </button>
+                        `).join('')}
+                        <button class="btn btn-primary btn-sm download-all-chunks" onclick="downloadAllChunks(${JSON.stringify(file.chunks).replace(/"/g, '&quot;')})">
+                            <i class="fas fa-download"></i> Download All Chunks
+                        </button>
+                    </div>
+                `;
+            } else {
+                // Regular file
+                return `
+                    <div class="result-file">
+                        <div class="result-file-name">📄 ${file.filename}</div>
+                        <div class="result-file-size">📦 Size: ${formatFileSize(file.size)}</div>
+                        ${file.protected ? '<div class="result-file-protected"><i class="fas fa-lock"></i> Password Protected</div>' : ''}
+                        <button class="btn btn-primary btn-sm" onclick="downloadFile('${file.download_url}', '${file.filename}')">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                    </div>
+                `;
+            }
+        }).join('');
+    } else if (data.is_chunked) {
+        // Single chunked file
+        resultContent.innerHTML = `
+            <div class="result-file chunked-file">
+                <div class="result-file-name">📄 ${data.original_name}</div>
+                <div class="result-file-size">📦 Original Size: ${formatFileSize(data.original_size)}</div>
+                <div class="chunk-info"><i class="fas fa-puzzle-piece"></i> Split into ${data.total_chunks} chunks</div>
+                ${data.protected ? '<div class="result-file-protected"><i class="fas fa-lock"></i> Password Protected</div>' : ''}
+                ${data.chunks.map(chunk => `
+                    <button class="btn btn-secondary btn-sm chunk-download" onclick="downloadFile('${chunk.download_url}', '${chunk.filename}')">
+                        <i class="fas fa-download"></i> Chunk ${chunk.chunk_number + 1}
+                    </button>
+                `).join('')}
+                <button class="btn btn-primary download-all-chunks" onclick="downloadAllChunks(${JSON.stringify(data.chunks).replace(/"/g, '&quot;')})">
+                    <i class="fas fa-download"></i> Download All Chunks
                 </button>
             </div>
-        `).join('');
+        `;
     } else {
         // Single file
         resultContent.innerHTML = `
@@ -344,13 +444,13 @@ function setupDecryptTab() {
         e.preventDefault();
         uploadArea.classList.remove('dragover');
         if (e.dataTransfer.files.length > 0) {
-            handleDecryption(e.dataTransfer.files[0]);
+            handleDecryption(e.dataTransfer.files);
         }
     });
     
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
-            handleDecryption(e.target.files[0]);
+            handleDecryption(e.target.files);
         }
     });
     
@@ -363,7 +463,7 @@ function setupDecryptTab() {
     });
 }
 
-function handleDecryption(file) {
+function handleDecryption(files) {
     const uploadArea = document.getElementById('decrypt-upload');
     const loadingArea = document.getElementById('decrypt-loading');
     const errorBox = document.getElementById('decrypt-error');
@@ -376,7 +476,18 @@ function handleDecryption(file) {
     loadingArea.classList.remove('hidden');
     
     const formData = new FormData();
-    formData.append('file', file);
+    const filesArray = Array.from(files);
+    
+    // Check if multiple files (chunks) or single file
+    if (filesArray.length > 1) {
+        // Multiple chunks
+        filesArray.forEach(file => {
+            formData.append('files', file);
+        });
+    } else {
+        // Single file
+        formData.append('file', filesArray[0]);
+    }
     
     const password = document.getElementById('decrypt-password').value.trim();
     if (password) {
@@ -414,8 +525,15 @@ function handleDecryption(file) {
 function showDecryptResult(data) {
     const resultArea = document.getElementById('decrypt-result');
     
-    resultArea.querySelector('.result-filename').textContent = `📄 ${data.filename}`;
-    resultArea.querySelector('.result-size').textContent = `📦 Size: ${formatFileSize(data.size)}`;
+    let filenameText = `📄 ${data.filename}`;
+    let sizeText = `📦 Size: ${formatFileSize(data.size)}`;
+    
+    if (data.was_chunked) {
+        filenameText += ` (Reassembled from ${data.chunks_count} chunks)`;
+    }
+    
+    resultArea.querySelector('.result-filename').textContent = filenameText;
+    resultArea.querySelector('.result-size').textContent = sizeText;
     
     downloadUrls.decrypt = data.download_url;
     
@@ -461,12 +579,20 @@ window.downloadFile = function(url, filename) {
     window.location.href = url;
 };
 
+window.downloadAllChunks = function(chunks) {
+    // Download all chunks sequentially with delay
+    chunks.forEach((chunk, index) => {
+        setTimeout(() => {
+            downloadFile(chunk.download_url, chunk.filename);
+        }, index * 500); // 500ms delay between downloads
+    });
+};
+
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
-    
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
+
