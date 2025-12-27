@@ -41,26 +41,38 @@
 
                 <div class="password-section">
                     <div class="password-toggle">
-                        <input type="checkbox" id="encrypt-use-password" class="toggle-checkbox">
-                        <label for="encrypt-use-password">
-                            <i class="fas fa-key"></i> Use password protection
+                        <label for="encrypt-use-password" class="toggle-switch-label">
+                            <span class="toggle-label-text">
+                                <i class="fas fa-lock"></i> Password Protection
+                            </span>
+                            <input type="checkbox" id="encrypt-use-password" class="toggle-checkbox">
+                            <span class="toggle-switch">
+                                <span class="toggle-slider"></span>
+                            </span>
                         </label>
                     </div>
                     <div class="password-input-group hidden" id="encrypt-password-group">
-                        <input type="password" id="encrypt-password" placeholder="Enter password" class="password-input">
-                        <button type="button" class="toggle-password" data-target="encrypt-password">
-                            <i class="fas fa-eye"></i>
-                        </button>
+                        <div class="input-wrapper">
+                            <i class="fas fa-key input-icon"></i>
+                            <input type="password" id="encrypt-password" placeholder="Enter secure password" class="password-input">
+                            <button type="button" class="toggle-password" data-target="encrypt-password" title="Toggle password visibility">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="bulk-password-option hidden" id="encrypt-bulk-option">
-                        <label>
-                            <input type="radio" name="password-mode" value="shared" checked>
-                            Use same password for all files
-                        </label>
-                        <label>
-                            <input type="radio" name="password-mode" value="individual">
-                            Set individual passwords
-                        </label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="password-mode" value="shared" checked>
+                                <span class="radio-custom"></span>
+                                <span class="radio-text">Use same password for all files</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="password-mode" value="individual">
+                                <span class="radio-custom"></span>
+                                <span class="radio-text">Set individual passwords</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
@@ -104,12 +116,19 @@
                     <p>Recover the original file from a ColorCrypt PNG image. Password will be requested if needed.</p>
                 </div>
 
-                <div class="password-section">
+                <div class="password-section decrypt-password">
+                    <div class="password-label">
+                        <i class="fas fa-lock"></i>
+                        <span>Password (if image is protected)</span>
+                    </div>
                     <div class="password-input-group" id="decrypt-password-group">
-                        <input type="password" id="decrypt-password" placeholder="Enter password (if protected)" class="password-input">
-                        <button type="button" class="toggle-password" data-target="decrypt-password">
-                            <i class="fas fa-eye"></i>
-                        </button>
+                        <div class="input-wrapper">
+                            <i class="fas fa-key input-icon"></i>
+                            <input type="password" id="decrypt-password" placeholder="Enter password if needed" class="password-input">
+                            <button type="button" class="toggle-password" data-target="decrypt-password" title="Toggle password visibility">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 

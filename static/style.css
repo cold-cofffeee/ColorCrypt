@@ -234,81 +234,264 @@ header {
 
 /* Password Section */
 .password-section {
-    background: var(--secondary-gradient);
-    padding: 20px;
-    border-radius: var(--border-radius);
-    margin-bottom: 20px;
-    border: 1px solid rgba(94, 231, 255, 0.1);
+    background: linear-gradient(135deg, rgba(11, 15, 26, 0.9), rgba(20, 28, 46, 0.9));
+    padding: 24px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(94, 231, 255, 0.15);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .password-toggle {
-    margin-bottom: 15px;
+    margin-bottom: 0;
 }
 
-.password-toggle label {
+/* Modern Toggle Switch */
+.toggle-switch-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+}
+
+.toggle-label-text {
     display: flex;
     align-items: center;
     gap: 10px;
-    cursor: pointer;
     color: var(--text-primary);
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.3px;
+}
+
+.toggle-label-text i {
+    color: var(--accent-color);
+    font-size: 16px;
 }
 
 .toggle-checkbox {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
+    display: none;
 }
 
+.toggle-switch {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    background: rgba(94, 231, 255, 0.1);
+    border-radius: 34px;
+    border: 2px solid rgba(94, 231, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.toggle-slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: var(--text-secondary);
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.toggle-checkbox:checked + .toggle-switch {
+    background: linear-gradient(135deg, var(--accent-color), #00d4ff);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 15px rgba(94, 231, 255, 0.3);
+}
+
+.toggle-checkbox:checked + .toggle-switch .toggle-slider {
+    transform: translateX(24px);
+    background: white;
+    box-shadow: 0 2px 8px rgba(94, 231, 255, 0.4);
+}
+
+/* Password Input Group */
 .password-input-group {
+    margin-top: 20px;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.input-wrapper {
+    position: relative;
     display: flex;
-    gap: 10px;
-    margin-top: 10px;
+    align-items: center;
+    background: var(--bg-card);
+    border: 2px solid rgba(94, 231, 255, 0.2);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.input-wrapper:focus-within {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(94, 231, 255, 0.1), var(--shadow-glow);
+}
+
+.input-icon {
+    position: absolute;
+    left: 16px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    pointer-events: none;
+    transition: color 0.3s ease;
+}
+
+.input-wrapper:focus-within .input-icon {
+    color: var(--accent-color);
 }
 
 .password-input {
     flex: 1;
-    padding: 12px 16px;
-    background: var(--bg-card);
-    border: 1px solid rgba(94, 231, 255, 0.2);
-    border-radius: 10px;
+    padding: 14px 16px 14px 44px;
+    background: transparent;
+    border: none;
     color: var(--text-primary);
     font-size: 14px;
-    transition: all 0.3s ease;
+    font-weight: 500;
+    outline: none;
 }
 
-.password-input:focus {
-    outline: none;
-    border-color: var(--accent-color);
-    box-shadow: var(--shadow-glow);
+.password-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
 }
 
 .toggle-password {
-    background: var(--bg-card);
-    border: 1px solid rgba(94, 231, 255, 0.2);
-    border-radius: 10px;
-    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    border-left: 1px solid rgba(94, 231, 255, 0.1);
+    padding: 14px 16px;
     cursor: pointer;
     color: var(--text-secondary);
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .toggle-password:hover {
     color: var(--accent-color);
-    border-color: var(--accent-color);
+    background: rgba(94, 231, 255, 0.05);
 }
 
+.toggle-password i {
+    font-size: 16px;
+}
+
+/* Bulk Password Options */
 .bulk-password-option {
-    margin-top: 15px;
-    padding-top: 15px;
+    margin-top: 20px;
+    padding-top: 20px;
     border-top: 1px solid rgba(94, 231, 255, 0.1);
 }
 
-.bulk-password-option label {
-    display: block;
-    margin-bottom: 10px;
-    color: var(--text-secondary);
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     cursor: pointer;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: rgba(94, 231, 255, 0.02);
+    border: 1px solid transparent;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.radio-label:hover {
+    background: rgba(94, 231, 255, 0.05);
+    border-color: rgba(94, 231, 255, 0.2);
+}
+
+.radio-label input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.radio-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(94, 231, 255, 0.3);
+    border-radius: 50%;
+    position: relative;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.radio-custom::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.radio-label input[type="radio"]:checked ~ .radio-custom {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px rgba(94, 231, 255, 0.3);
+}
+
+.radio-label input[type="radio"]:checked ~ .radio-custom::after {
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.radio-text {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.radio-label:hover .radio-text,
+.radio-label input[type="radio"]:checked ~ .radio-text {
+    color: var(--text-primary);}
+
+/* Decrypt Password Section */
+.decrypt-password .password-input-group {
+    margin-top: 0;
+}
+
+.password-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.3px;
+    margin-bottom: 16px;
+}
+
+.password-label i {
+    color: var(--accent-color);
+    font-size: 16px;
+}    cursor: pointer;
 }
 
 .bulk-password-option input[type="radio"] {
