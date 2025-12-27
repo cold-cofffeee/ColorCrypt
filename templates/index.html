@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ColorCrypt - Hide Files in Images</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-palette"></i>
+                <h1>ColorCrypt</h1>
+            </div>
+            <p class="tagline">Turn any file into an image, and back again</p>
+        </header>
+
+        <main>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="encrypt">
+                    <i class="fas fa-lock"></i> Encrypt
+                </button>
+                <button class="tab-btn" data-tab="decrypt">
+                    <i class="fas fa-unlock"></i> Decrypt
+                </button>
+            </div>
+
+            <!-- Encrypt Tab -->
+            <div class="tab-content active" id="encrypt-tab">
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Convert any file into a PNG image. Perfect for sharing files that platforms don't normally accept!</p>
+                </div>
+
+                <div class="upload-area" id="encrypt-upload">
+                    <div class="upload-icon">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <h3>Drop your file here</h3>
+                    <p>or click to browse</p>
+                    <input type="file" id="encrypt-file-input" accept="*/*" hidden>
+                </div>
+
+                <div id="encrypt-result" class="result-area hidden">
+                    <div class="result-success">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>File encrypted successfully!</h3>
+                        <p class="result-filename"></p>
+                        <p class="result-size"></p>
+                        <button class="btn btn-primary" id="encrypt-download-btn">
+                            <i class="fas fa-download"></i> Download PNG
+                        </button>
+                        <button class="btn btn-secondary" id="encrypt-reset-btn">
+                            <i class="fas fa-redo"></i> Encrypt Another
+                        </button>
+                    </div>
+                </div>
+
+                <div id="encrypt-loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Encrypting your file...</p>
+                </div>
+
+                <div id="encrypt-error" class="error-box hidden">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p class="error-message"></p>
+                </div>
+            </div>
+
+            <!-- Decrypt Tab -->
+            <div class="tab-content" id="decrypt-tab">
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Recover the original file from a ColorCrypt PNG image.</p>
+                </div>
+
+                <div class="upload-area" id="decrypt-upload">
+                    <div class="upload-icon">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <h3>Drop your PNG here</h3>
+                    <p>or click to browse</p>
+                    <input type="file" id="decrypt-file-input" accept=".png,image/png" hidden>
+                </div>
+
+                <div id="decrypt-result" class="result-area hidden">
+                    <div class="result-success">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>File decrypted successfully!</h3>
+                        <p class="result-filename"></p>
+                        <p class="result-size"></p>
+                        <button class="btn btn-primary" id="decrypt-download-btn">
+                            <i class="fas fa-download"></i> Download File
+                        </button>
+                        <button class="btn btn-secondary" id="decrypt-reset-btn">
+                            <i class="fas fa-redo"></i> Decrypt Another
+                        </button>
+                    </div>
+                </div>
+
+                <div id="decrypt-loading" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Decrypting your image...</p>
+                </div>
+
+                <div id="decrypt-error" class="error-box hidden">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p class="error-message"></p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="features">
+                <div class="feature">
+                    <i class="fas fa-shield-alt"></i>
+                    <h4>Secure</h4>
+                    <p>SHA1 integrity check</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-bolt"></i>
+                    <h4>Fast</h4>
+                    <p>Instant conversion</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-file"></i>
+                    <h4>Any File</h4>
+                    <p>Works with all types</p>
+                </div>
+            </div>
+            <p class="disclaimer">⚠️ ColorCrypt is for privacy and experimentation. Use responsibly.</p>
+            <p class="copyright">Made with <i class="fas fa-heart"></i> | Open Source</p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
