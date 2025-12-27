@@ -664,6 +664,83 @@ function updateProgress(mode, percentage, status, detail) {
     if (progressText) progressText.textContent = percentage + '%';
     if (statusText) statusText.textContent = status;
     if (detailText) detailText.textContent = detail;
+    
+    // Update estimated time based on actual progress
+    if (startTimes[mode] && percentage > 10 && percentage < 100) {
+        const now = Date.now();
+        const elapsed = (now - startTimes[mode]) / 1000; // seconds
+        
+        // Calculate time per percentage point
+        const timePerPercent = elapsed / percentage;
+        const remainingPercent = 100 - percentage;
+        const estimatedRemaining = Math.ceil(timePerPercent * remainingPercent);
+        
+        estimatedTimes[mode] = Math.floor(elapsed + estimatedRemaining);
+    }
+}
+
+function startTimer(type, totalSizeBytes = 0) {
+    startTimes[type] = Date.now();
+    lastProgress[type] = { percentage: 0, time: Date.now() };
+    const timerElement = document.getElementById(`${type}-timer`);
+    
+    // Initial estimate based on file size (rough: 20MB/sec processing speed)
+    if (totalSizeBytes > 0) {
+        const estimatedSeconds = Math.ceil(totalSizeBytes / (20 * 1024 * 1024));
+        estimatedTimes[type] = estimatedSeconds;
+    } else {
+        estimatedTimes[type] = null;
+    }
+    
+    // Clear any existing interval
+    if (timerIntervals[type]) {
+        clearInterval(timerIntervals[type]);
+    }
+    
+    // Update timer every 100ms
+    timerIntervals[type] = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTimes[type]) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        
+        let timeText = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+        
+        // Add estimated time remaining if available
+        if (estimatedTimes[type] !== null && estimatedTimes[type] > elapsed) {
+            const remaining = estimatedTimes[type] - elapsed;
+            const remMin = Math.floor(remaining / 60);
+            const remSec = remaining % 60;
+            const remText = remMin > 0 ? `${remMin}m ${remSec}s` : `${remSec}s`;
+            timeText += ` | ETA: ${remText}`;
+        }
+        
+        if (timerElement) {
+            timerElement.textContent = `⏱️ ${timeText}`;
+        }
+    }, 100);
+}
+
+function stopTimer(type) {
+    if (timerIntervals[type]) {
+        clearInterval(timerIntervals[type]);
+        timerIntervals[type] = null;
+    }
+    
+    // Show final time
+    if (startTimes[type]) {
+        const elapsed = Math.floor((Date.now() - startTimes[type]) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        const timerElement = document.getElementById(`${type}-timer`);
+        
+        if (timerElement) {
+            if (minutes > 0) {
+                timerElement.textContent = `⏱️ Completed in ${minutes}m ${seconds}s`;
+            } else {
+                timerElement.textContent = `⏱️ Completed in ${seconds}s`;
+            }
+        }
+    }
 }
 
 function formatFileSize(bytes) {
